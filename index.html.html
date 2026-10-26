@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Daymark — Personal Tracker</title>
+<style>
+:root {
+  --site-primary: #23594B;
+  --site-on-primary: #FFFFFF;
+  --site-secondary: #E5EFE8;
+  --site-on-secondary: #183D33;
+  --site-background: #F5F7F2;
+  --site-on-background: #1C2924;
+  --site-font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --site-font-heading: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --site-heading-scale: 1;
+  --site-spacing-scale: 1;
+  --site-radius-scale: 1;
+  --site-decoration-opacity: 1;
+  --surface: light-dark(#FFFFFF, #202923);
+  --surface-soft: light-dark(#EEF3ED, #28352D);
+  --text: light-dark(#1C2924, #F0F5F0);
+  --muted: light-dark(#66766D, #AAB8AE);
+  --border: light-dark(#DCE5DC, #3A493F);
+  --good: light-dark(#24734E, #8DD7AC);
+  --warn: light-dark(#A35A28, #F2B47E);
+  --shadow: 0 12px 32px rgba(28, 50, 37, .08);
+}
+* { box-sizing: border-box; }
+html { background: var(--site-background); }
+body { margin: 0; background: var(--site-background); color: var(--text); font-family: var(--site-font-body); }
+button, input, select { font: inherit; }
+button, input, select { min-height: 44px; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #D68C4D; outline-offset: 2px; }
+.app-root { min-height: 100vh; width: 100%; border-radius: 0; background-color: var(--site-background); color: var(--site-on-background); }
+.topbar { background: var(--site-primary); color: var(--site-on-primary); padding: calc(22px * var(--site-spacing-scale)) max(20px, calc((100vw - 1100px) / 2)); }
+.topline { display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.brand { display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:-.04em; font-size:1.2rem; }
+.brandmark { display:grid; place-items:center; width:36px; height:36px; border-radius:12px; background:#D9E9D9; color:#23594B; font-size:1.1rem; }
+.date-pill { color:#E1EEE4; font-size:.85rem; }
+.hero { max-width:1100px; margin:0 auto; padding:28px 20px 8px; }
+.eyebrow { text-transform:uppercase; letter-spacing:.12em; font-size:.72rem; font-weight:800; color:var(--muted); }
+h1,h2,h3,p { margin-top:0; }
+h1 { font-family:var(--site-font-heading); font-size:calc(clamp(1.9rem, 5vw, 3rem) * var(--site-heading-scale)); letter-spacing:-.055em; line-height:1.05; margin:10px 0; color:var(--text); }
+h2 { font-size:calc(1.2rem * var(--site-heading-scale)); letter-spacing:-.03em; margin-bottom:5px; }
+h3 { font-size:1rem; margin-bottom:8px; }
+.subhead { color:var(--muted); max-width:650px; line-height:1.55; margin-bottom:0; }
+.tabs { display:flex; gap:8px; overflow-x:auto; padding:18px 20px 10px; max-width:1100px; margin:0 auto; }
+.tab { border:1px solid var(--border); border-radius:999px; background:var(--surface); color:var(--text); padding:10px 16px; white-space:nowrap; font-weight:700; }
+.tab[aria-selected="true"] { background:var(--site-primary); border-color:var(--site-primary); color:var(--site-on-primary); }
+main { max-width:1100px; margin:0 auto; padding:10px 20px 48px; }
+.grid { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:16px; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:calc(20px * var(--site-radius-scale)); padding:calc(20px * var(--site-spacing-scale)); box-shadow:var(--shadow); min-width:0; }
+.span-8 { grid-column:span 8; } .span-7 { grid-column:span 7; } .span-6 { grid-column:span 6; } .span-5 { grid-column:span 5; } .span-4 { grid-column:span 4; } .span-12 { grid-column:span 12; }
+.card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:16px; }
+.small { color:var(--muted); font-size:.88rem; line-height:1.45; }
+.metric { font-size:clamp(1.65rem,4vw,2.25rem); font-weight:800; letter-spacing:-.055em; margin:8px 0 4px; overflow-wrap:anywhere; }
+.metric-label { font-size:.85rem; color:var(--muted); }
+.pill { display:inline-flex; align-items:center; border-radius:999px; padding:6px 10px; background:var(--site-secondary); color:var(--site-on-secondary); font-size:.76rem; font-weight:800; }
+.progress { height:9px; border-radius:999px; overflow:hidden; background:var(--surface-soft); margin:12px 0 8px; }
+.progress > span { display:block; height:100%; width:0; border-radius:inherit; background:var(--site-primary); transition:width .2s ease; }
+.habit-list { display:grid; gap:10px; }
+.habit { display:flex; align-items:center; gap:12px; border:1px solid var(--border); border-radius:14px; padding:11px 12px; }
+.habit input { width:22px; height:22px; min-height:22px; accent-color:var(--site-primary); flex:0 0 auto; }
+.habit-copy { flex:1; min-width:0; }
+.habit-name { font-weight:700; overflow-wrap:anywhere; }
+.habit-detail { color:var(--muted); font-size:.78rem; margin-top:2px; }
+.habit.done { background:var(--surface-soft); }
+.habit.done .habit-name { text-decoration:line-through; color:var(--muted); }
+.icon-btn { width:40px; min-height:40px; border-radius:12px; border:1px solid var(--border); color:var(--text); background:var(--surface); font-weight:800; }
+.primary-btn { border:0; border-radius:12px; padding:11px 15px; color:var(--site-on-primary); background:var(--site-primary); font-weight:800; }
+.secondary-btn { border:1px solid var(--border); border-radius:12px; padding:10px 13px; color:var(--text); background:var(--surface); font-weight:700; }
+.btn-row { display:flex; gap:8px; flex-wrap:wrap; }
+.form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+.field.full { grid-column:1 / -1; }
+label { font-size:.82rem; color:var(--muted); font-weight:700; }
+input, select { border:1px solid var(--border); border-radius:12px; padding:10px 12px; color:var(--text); background:var(--surface); width:100%; }
+input::placeholder { color:var(--muted); opacity:.8; }
+.form-actions { grid-column:1 / -1; display:flex; gap:8px; flex-wrap:wrap; }
+.money-row { display:flex; justify-content:space-between; gap:10px; padding:12px 0; border-bottom:1px solid var(--border); align-items:center; }
+.money-row:last-child { border-bottom:0; }
+.money-title { font-weight:700; overflow-wrap:anywhere; }
+.money-meta { color:var(--muted); font-size:.78rem; margin-top:3px; }
+.money-amount { font-weight:800; white-space:nowrap; }
+.money-amount.income { color:var(--good); }
+.money-amount.expense { color:var(--warn); }
+.empty { text-align:center; padding:24px 10px; color:var(--muted); }
+.goal-line { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.goal-amount { font-size:1.5rem; font-weight:800; letter-spacing:-.04em; }
+.notice { border-radius:14px; background:var(--surface-soft); padding:13px 14px; font-size:.84rem; line-height:1.5; color:var(--text); }
+.footer { max-width:1100px; margin:0 auto; padding:0 20px 30px; color:var(--muted); font-size:.78rem; line-height:1.5; }
+.view { display:none; } .view.active { display:block; }
+.chart-bars { display:flex; gap:8px; align-items:flex-end; height:130px; padding:12px 0 0; }
+.bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:7px; min-width:0; height:100%; justify-content:flex-end; }
+.bar { width:min(32px,70%); min-height:3px; background:var(--site-primary); border-radius:7px 7px 2px 2px; }
+.bar-label { font-size:.7rem; color:var(--muted); }
+@media (max-width:720px) { .span-8,.span-7,.span-6,.span-5,.span-4 { grid-column:span 12; } .topbar { padding:18px 20px; } .hero { padding-top:24px; } .card { padding:16px; } .form-grid { grid-template-columns:1fr; } .field.full,.form-actions { grid-column:auto; } .date-pill { font-size:.75rem; } }
+@media (prefers-reduced-motion: reduce) { *,*::before,*::after { transition:none !important; scroll-behavior:auto !important; } }
+</style>
+</head>
+<body>
+<div class="app-root">
+  <header class="topbar">
+    <div class="topline">
+      <div class="brand"><span class="brandmark" aria-hidden="true">✳</span> daymark</div>
+      <div class="date-pill" id="todayLabel"></div>
+    </div>
+  </header>
+  <section class="hero">
+    <div class="eyebrow">Your everyday dashboard</div>
+    <h1>A little progress, every day.</h1>
+    <p class="subhead">Build routines that stick and keep your money in view. Small steps count — check in whenever you have a moment.</p>
+  </section>
+  <nav class="tabs" aria-label="Tracker sections" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-view="overview">Overview</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="habits">Habits</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="money">Money</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="settings">Settings & data</button>
+  </nav>
+  <main>
+    <section class="view active" id="view-overview" role="tabpanel">
+      <div class="grid">
+        <article class="card span-4">
+          <div class="eyebrow">Today's habits</div><div class="metric" id="habitMetric">0 / 3</div><div class="metric-label">routines completed</div>
+          <div class="progress" aria-label="Today's habit completion"><span id="habitProgress"></span></div>
+          <div class="small" id="habitEncouragement">Every check-in is a win.</div>
+        </article>
+        <article class="card span-4">
+          <div class="eyebrow">Spent this month</div><div class="metric" id="spentMetric">$0.00</div><div class="metric-label">recorded expenses</div>
+          <div class="small" id="spentNote">Add expenses to see your month take shape.</div>
+        </article>
+        <article class="card span-4">
+          <div class="eyebrow">Savings goal</div><div class="metric" id="savingsMetric">$0.00</div><div class="metric-label" id="savingsLabel">saved toward your goal</div>
+          <div class="progress" aria-label="Savings goal progress"><span id="savingsProgress"></span></div>
+          <div class="small" id="savingsNote">Set a goal that matters to you.</div>
+        </article>
+        <article class="card span-7">
+          <div class="card-head"><div><h2>Your daily habits</h2><p class="small">Tap a routine when you've done it.</p></div><button class="secondary-btn" data-goto="habits">Edit habits</button></div>
+          <div class="habit-list" id="overviewHabits"></div>
+        </article>
+        <article class="card span-5">
+          <div class="card-head"><div><h2>Recent money activity</h2><p class="small">Your latest entries</p></div><button class="secondary-btn" data-goto="money">View all</button></div>
+          <div id="recentTransactions"></div>
+        </article>
+        <article class="card span-12">
+          <div class="card-head"><div><h2>Spending snapshot</h2><p class="small">Expenses by category this month</p></div><span class="pill" id="categoryCount">0 categories</span></div>
+          <div id="spendingBars" class="chart-bars" aria-label="Expense categories bar chart"></div>
+          <div id="spendingLegend" class="small" style="margin-top:14px"></div>
+        </article>
+      </div>
+    </section>
+    <section class="view" id="view-habits" role="tabpanel">
+      <div class="grid">
+        <article class="card span-7">
+          <div class="card-head"><div><h2>Habit check-in</h2><p class="small" id="habitDateText">A fresh day, a fresh start.</p></div><span class="pill" id="habitCountPill">0 done</span></div>
+          <div class="habit-list" id="habitList"></div>
+          <div class="notice" style="margin-top:16px">Tip: start with 2–5 routines you can realistically do most days. Consistency beats perfection.</div>
+        </article>
+        <article class="card span-5">
+          <h2>Add a routine</h2><p class="small">Keep the name short and specific.</p>
+          <form id="habitForm" class="form-grid">
+            <div class="field full"><label for="habitName">Routine name</label><input id="habitName" maxlength="70" placeholder="e.g. 10-minute walk" required></div>
+            <div class="field full"><label for="habitDetail">Optional reminder or note</label><input id="habitDetail" maxlength="100" placeholder="e.g. after lunch"></div>
+            <div class="form-actions"><button class="primary-btn" type="submit">+ Add routine</button></div>
+          </form>
+          <div style="height:22px"></div><h3>Keep it manageable</h3><p class="small">You can remove a routine at any time. Your past check-ins stay attached to their dates.</p>
+        </article>
+      </div>
+    </section>
+    <section class="view" id="view-money" role="tabpanel">
+      <div class="grid">
+        <article class="card span-5">
+          <h2>Add a money entry</h2><p class="small">Record an expense or income in a few taps.</p>
+          <form id="transactionForm" class="form-grid">
+            <div class="field"><label for="entryType">Type</label><select id="entryType"><option value="expense">Expense</option><option value="income">Income</option></select></div>
+            <div class="field"><label for="entryAmount">Amount</label><input id="entryAmount" type="number" min="0.01" max="999999999" step="0.01" inputmode="decimal" placeholder="0.00" required></div>
+            <div class="field full"><label for="entryTitle">What was it for?</label><input id="entryTitle" maxlength="80" placeholder="e.g. Lunch, salary, transport" required></div>
+            <div class="field"><label for="entryCategory">Category</label><select id="entryCategory"><option>Food</option><option>Transport</option><option>Home & bills</option><option>Shopping</option><option>Health</option><option>Fun</option><option>Salary</option><option>Savings</option><option>Other</option></select></div>
+            <div class="field"><label for="entryDate">Date</label><input id="entryDate" type="date" required></div>
+            <div class="form-actions"><button class="primary-btn" type="submit">+ Save entry</button></div>
+          </form>
+          <div style="height:22px"></div>
+          <h3>Savings goal</h3>
+          <form id="goalForm" class="form-grid">
+            <div class="field full"><label for="goalName">Goal name</label><input id="goalName" maxlength="70" placeholder="e.g. Emergency fund"></div>
+            <div class="field"><label for="goalTarget">Target amount</label><input id="goalTarget" type="number" min="0" step="0.01" inputmode="decimal" placeholder="1000"></div>
+            <div class="field"><label for="goalSaved">Already saved</label><input id="goalSaved" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0"></div>
+            <div class="form-actions"><button class="secondary-btn" type="submit">Update goal</button></div>
+          </form>
+        </article>
+        <article class="card span-7">
+          <div class="card-head"><div><h2>Money activity</h2><p class="small">Your entries, newest first.</p></div><select id="transactionFilter" aria-label="Filter money entries" style="width:auto"><option value="all">All entries</option><option value="expense">Expenses</option><option value="income">Income</option></select></div>
+          <div id="transactionList"></div>
+          <div class="btn-row" style="margin-top:16px"><button class="secondary-btn" id="exportCsv">Export CSV</button><button class="secondary-btn" id="clearTransactions">Clear entries</button></div>
+        </article>
+      </div>
+    </section>
+    <section class="view" id="view-settings" role="tabpanel">
+      <div class="grid">
+        <article class="card span-7">
+          <h2>Make it yours</h2><p class="small">Choose your display currency and export a backup. Currency changes the display only; it does not convert existing values.</p>
+          <form id="settingsForm" class="form-grid" style="margin-top:16px">
+            <div class="field"><label for="currency">Currency</label><select id="currency"><option value="SGD">SGD — Singapore dollar</option><option value="USD">USD — US dollar</option><option value="GBP">GBP — Pound sterling</option><option value="EUR">EUR — Euro</option><option value="AUD">AUD — Australian dollar</option><option value="MYR">MYR — Malaysian ringgit</option><option value="INR">INR — Indian rupee</option><option value="JPY">JPY — Japanese yen</option></select></div>
+            <div class="field"><label for="weekStart">Week starts on</label><select id="weekStart"><option value="monday">Monday</option><option value="sunday">Sunday</option></select></div>
+            <div class="form-actions"><button class="primary-btn" type="submit">Save settings</button><button class="secondary-btn" type="button" id="exportJson">Export full backup</button></div>
+          </form>
+        </article>
+        <article class="card span-5">
+          <h2>Privacy & data</h2>
+          <div class="notice" style="margin:12px 0">This preview stores entries in this browser on this device. It does not sync across devices or automatically back up your data.</div>
+          <p class="small">Do not enter bank account numbers, passwords, or other highly sensitive information. If you publish a shared tracker, anyone with access may be able to see its contents. For a public link, use fictional demo data or keep personal finance details private.</p>
+          <div class="btn-row"><button class="secondary-btn" id="resetDemo">Reset demo data</button></div>
+        </article>
+      </div>
+    </section>
+  </main>
+  <footer class="footer">Daymark is a lightweight personal tracker preview. Data is stored locally in this browser. Export a backup before clearing browser data or switching devices.</footer>
+</div>
+<script>
+(() => {
+  const KEY = 'daymark_tracker_v1';
+  const today = new Date();
+  const isoDate = (d) => { const x = new Date(d.getTime() - d.getTimezoneOffset() * 60000); return x.toISOString().slice(0,10); };
+  const dateToday = isoDate(today);
+  const defaultData = () => ({
+    currency:'SGD', weekStart:'monday',
+    habits:[{id:'h1',name:'Drink water',detail:'A glass to start the day'},{id:'h2',name:'Move for 10 minutes',detail:'Stretch, walk, or dance'},{id:'h3',name:'Plan tomorrow',detail:'Write down one priority'}],
+    checks:{}, goal:{name:'Rainy day fund',target:1000,saved:150},
+    transactions:[
+      {id:'t1',type:'expense',amount:6.5,title:'Lunch',category:'Food',date:dateToday},
+      {id:'t2',type:'expense',amount:2.2,title:'Train fare',category:'Transport',date:dateToday},
+      {id:'t3',type:'income',amount:80,title:'Side project',category:'Salary',date:dateToday}
+    ]
+  });
+  function load() { try { const s = localStorage.getItem(KEY); return s ? {...defaultData(),...JSON.parse(s)} : defaultData(); } catch(e) { return defaultData(); } }
+  let data = load();
+  const $ = (id) => document.getElementById(id);
+  const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const money = (n) => new Intl.NumberFormat(undefined,{style:'currency',currency:data.currency,maximumFractionDigits:2}).format(Number(n)||0);
+  const save = () => { try { localStorage.setItem(KEY,JSON.stringify(data)); } catch(e) {} render(); };
+  const prettyDate = (s) => { const d = new Date(s+'T12:00:00'); return d.toLocaleDateString(undefined,{month:'short',day:'numeric'}); };
+  const monthNow = dateToday.slice(0,7);
+  const monthTransactions = () => data.transactions.filter(t => t.date && t.date.slice(0,7)===monthNow);
+  const expensesThisMonth = () => monthTransactions().filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0);
+  function habitHtml(h) { const done = !!(data.checks[dateToday]||{})[h.id]; return `<div class="habit ${done?'done':''}"><input type="checkbox" data-check="${escapeHtml(h.id)}" ${done?'checked':''} aria-label="Mark ${escapeHtml(h.name)} complete"><div class="habit-copy"><div class="habit-name">${escapeHtml(h.name)}</div><div class="habit-detail">${escapeHtml(h.detail||'Daily routine')}</div></div><button class="icon-btn" data-remove-habit="${escapeHtml(h.id)}" aria-label="Remove ${escapeHtml(h.name)}" title="Remove routine">×</button></div>`; }
+  function transactionHtml(t, showDate=true) { const income=t.type==='income'; return `<div class="money-row"><div style="min-width:0"><div class="money-title">${escapeHtml(t.title)}</div><div class="money-meta">${escapeHtml(t.category)}${showDate?' · '+prettyDate(t.date):''}</div></div><div style="display:flex;align-items:center;gap:10px"><div class="money-amount ${income?'income':'expense'}">${income?'+':'−'}${money(t.amount)}</div><button class="icon-btn" data-remove-transaction="${escapeHtml(t.id)}" aria-label="Delete ${escapeHtml(t.title)}" title="Delete entry">×</button></div></div>`; }
+  function render() {
+    $('todayLabel').textContent = today.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+    $('habitDateText').textContent = today.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+    const checks=data.checks[dateToday]||{}; const completed=data.habits.filter(h=>checks[h.id]).length; const total=data.habits.length;
+    $('habitMetric').textContent=`${completed} / ${total}`; $('habitProgress').style.width=(total?completed/total*100:0)+'%'; $('habitCountPill').textContent=`${completed} of ${total} done`;
+    $('habitEncouragement').textContent=total&&completed===total?'Lovely work — you showed up for yourself.':completed?`${total-completed} more ${total-completed===1?'routine':'routines'} if you feel like it.`:'Start small. One check-in is progress.';
+    $('overviewHabits').innerHTML=data.habits.length?data.habits.map(h=>habitHtml(h)).join(''):'<div class="empty">No routines yet. Add one in the Habits tab.</div>';
+    $('habitList').innerHTML=data.habits.length?data.habits.map(h=>habitHtml(h)).join(''):'<div class="empty">No routines yet. Add your first routine using the form.</div>';
+    const spent=expensesThisMonth(); $('spentMetric').textContent=money(spent); $('spentNote').textContent=`${monthTransactions().filter(t=>t.type==='expense').length} expense entries this month`;
+    $('savingsMetric').textContent=money(data.goal.saved); $('savingsLabel').textContent=`saved toward ${data.goal.name||'your goal'}`; const gp=data.goal.target>0?Math.min(100,Number(data.goal.saved)/Number(data.goal.target)*100):0; $('savingsProgress').style.width=gp+'%'; $('savingsNote').textContent=data.goal.target>0?`${gp.toFixed(0)}% of ${money(data.goal.target)} goal`:'Set a target amount in Money.';
+    const sorted=[...data.transactions].sort((a,b)=>(b.date||'').localeCompare(a.date||'')||String(b.id).localeCompare(String(a.id)));
+    $('recentTransactions').innerHTML=sorted.length?sorted.slice(0,4).map(t=>transactionHtml(t)).join(''):'<div class="empty">No entries yet.</div>';
+    const filter=$('transactionFilter')?.value||'all'; const filtered=sorted.filter(t=>filter==='all'||t.type===filter);
+    $('transactionList').innerHTML=filtered.length?filtered.map(t=>transactionHtml(t)).join(''):'<div class="empty">No matching entries. Add one using the form.</div>';
+    const cats={}; monthTransactions().filter(t=>t.type==='expense').forEach(t=>cats[t.category]=(cats[t.category]||0)+Number(t.amount)); const catEntries=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,6); const max=Math.max(1,...catEntries.map(x=>x[1]));
+    $('spendingBars').innerHTML=catEntries.length?catEntries.map(([name,val])=>`<div class="bar-wrap" title="${escapeHtml(name)}: ${escapeHtml(money(val))}"><div class="bar" style="height:${Math.max(4,val/max*100)}%"></div><div class="bar-label">${escapeHtml(name.length>9?name.slice(0,8)+'…':name)}</div></div>`).join(''):'<div class="empty" style="width:100%;padding:15px">Your category chart will appear when you log expenses.</div>';
+    $('categoryCount').textContent=`${Object.keys(cats).length} ${Object.keys(cats).length===1?'category':'categories'}`;
+    $('spendingLegend').textContent=catEntries.map(([name,val])=>`${name}: ${money(val)}`).join('  •  ');
+    $('currency').value=data.currency; $('weekStart').value=data.weekStart; $('goalName').value=data.goal.name||''; $('goalTarget').value=data.goal.target||''; $('goalSaved').value=data.goal.saved||'';
+    $('entryDate').value=$('entryDate').value||dateToday;
+  }
+  function setView(name) { document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+name)); document.querySelectorAll('.tab').forEach(t=>{const active=t.dataset.view===name;t.setAttribute('aria-selected',String(active));}); }
+  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+  document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.goto)));
+  document.addEventListener('change',e=>{ if(e.target.matches('[data-check]')) { const id=e.target.dataset.check; data.checks[dateToday]=data.checks[dateToday]||{}; data.checks[dateToday][id]=e.target.checked; save(); } if(e.target.id==='transactionFilter') render(); });
+  document.addEventListener('click',e=>{ const rh=e.target.closest('[data-remove-habit]'); if(rh){data.habits=data.habits.filter(h=>h.id!==rh.dataset.removeHabit);save();return;} const rt=e.target.closest('[data-remove-transaction]'); if(rt){data.transactions=data.transactions.filter(t=>t.id!==rt.dataset.removeTransaction);save();} });
+  $('habitForm').addEventListener('submit',e=>{e.preventDefault();const name=$('habitName').value.trim();if(!name)return;data.habits.push({id:'h'+Date.now(),name,detail:$('habitDetail').value.trim()});e.target.reset();save();});
+  $('transactionForm').addEventListener('submit',e=>{e.preventDefault();const amount=Number($('entryAmount').value);const title=$('entryTitle').value.trim();if(!(amount>0)||!title)return;data.transactions.push({id:'t'+Date.now(),type:$('entryType').value,amount,title,category:$('entryCategory').value,date:$('entryDate').value||dateToday});e.target.reset();$('entryDate').value=dateToday;save();});
+  $('goalForm').addEventListener('submit',e=>{e.preventDefault();data.goal={name:$('goalName').value.trim()||'Savings goal',target:Math.max(0,Number($('goalTarget').value)||0),saved:Math.max(0,Number($('goalSaved').value)||0)};save();});
+  $('settingsForm').addEventListener('submit',e=>{e.preventDefault();data.currency=$('currency').value;data.weekStart=$('weekStart').value;save();});
+  function download(name,content,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);}
+  $('exportJson').addEventListener('click',()=>download('daymark-backup.json',JSON.stringify(data,null,2),'application/json'));
+  $('exportCsv').addEventListener('click',()=>{const rows=[['type','amount','title','category','date'],...data.transactions.map(t=>[t.type,t.amount,t.title,t.category,t.date])];const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');download('daymark-transactions.csv',csv,'text/csv;charset=utf-8;');});
+  $('clearTransactions').addEventListener('click',()=>{if(confirm('Delete all money entries? This cannot be undone unless you exported a backup.')){data.transactions=[];save();}});
+  $('resetDemo').addEventListener('click',()=>{if(confirm('Reset the tracker to its example data? Your current entries will be replaced. Export a backup first if needed.')){data=defaultData();save();setView('overview');}});
+  $('entryDate').value=dateToday;
+  render();
+})();
+</script>
+</body>
+</html>
